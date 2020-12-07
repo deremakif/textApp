@@ -25,10 +25,10 @@ namespace textApp
             SolidBrush solidBrush = new SolidBrush(Color.Black);
             Rectangle rectangle = new Rectangle(0, 0, 500, 500);
             StringFormat stringFormat = new StringFormat();
-         
-            stringFormat.LineAlignment = StringAlignment.Far; // Far, Center, Near
-            stringFormat.Alignment = StringAlignment.Far; // Far, Center, Near
-          
+
+            stringFormat.LineAlignment = StringAlignment.Center; // Far, Center, Near
+            stringFormat.Alignment = StringAlignment.Center; // Far, Center, Near
+
             g.DrawString(text, font, solidBrush, rectangle, stringFormat);
 
             var jpgEncoder = GetEncoder(ImageFormat.Jpeg);
@@ -36,36 +36,32 @@ namespace textApp
             var myEncoderParameters = new EncoderParameters(1);
 
             myEncoderParameters.Param[0] = new EncoderParameter(myEncoder, 100);
-            result.Save("assets/outputImageWithSystemDrawing.jpg", jpgEncoder, myEncoderParameters);
+            // result.Save("assets/outputImageWithSystemDrawingCenter.jpg", jpgEncoder, myEncoderParameters);
             #endregion
 
             #region With SkiaSharp
-            SKBitmap resultWithSkia = SKBitmap.Decode("assets/input.png");
 
             var info = new SKImageInfo(500, 500);
             using (var surface = SKSurface.Create(info))
             {
                 // the the canvas and properties
                 var canvas = surface.Canvas;
-
+            
                 canvas.Clear(SKColor.Parse("008000")); // Green Hex Code.
 
-                if (resultWithSkia != null)
+                var paint = new SKPaint
                 {
-                    SKImageInfo resizeInfo = new SKImageInfo(326, 296);
-                    using (SKBitmap resizedSKBitmap = resultWithSkia.Resize(resizeInfo, SKFilterQuality.High))
-                    using (SKImage newImg = SKImage.FromPixels(resizedSKBitmap.PeekPixels()))
-                    using (SKData data = newImg.Encode(SKEncodedImageFormat.Png, 100))
-                    using (Stream imgStream = data.AsStream())
-                    {
-                        canvas.DrawBitmap(resizedSKBitmap, new SKPoint(0, 0));
-                    }
-                }
+                    Color = SKColors.Black,
+                    TextSize = 16,
+                    TextAlign = SKTextAlign.Right, // Left,Right,Center                   
+                };
+
+                canvas.DrawText(text, new SKPoint(250, 250), paint);
 
                 // save the file
                 using (var image = surface.Snapshot())
-                using (var data = image.Encode(SKEncodedImageFormat.Png, 100))
-                using (var stream = System.IO.File.OpenWrite("assets/outputImageWithSkiaSharp.jpg"))
+                using (var data = image.Encode(SKEncodedImageFormat.Jpeg, 100))
+                using (var stream = System.IO.File.OpenWrite("assets/outputImageWithSkiaSharpRight.jpg"))
                 {
                     data.SaveTo(stream);
                 }
